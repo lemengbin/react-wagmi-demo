@@ -48,7 +48,7 @@ const safeTestnet = defineChain({
   },
   blockExplorers: {
     default: {
-      name: 'Safe(AnWang) Explorer',
+      name: 'Safe(AnWang) Testnet Explorer',
       url: 'https://safe4testnet.anwang.com',
     },
   },
