@@ -3,7 +3,7 @@ import { defineChain } from '@reown/appkit/networks'
 import type { AppKitNetwork } from '@reown/appkit/networks'
 
 // Get projectId from https://dashboard.reown.com
-export const projectId = import.meta.env.VITE_PROJECT_ID || "b0f795960959cde8d76422ce52747df7" // this is a public projectId only to use on localhost
+export const projectId = import.meta.env.VITE_PROJECT_ID || "8719c407fb38ae1779b208a0062ea0a5" // this is a public projectId only to use on localhost
 
 if (!projectId) {
   throw new Error('Project ID is not defined')
