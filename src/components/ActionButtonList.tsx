@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDisconnect, useAppKit, useAppKitNetwork, useAppKitAccount  } from '@reown/appkit/react'
 import { parseGwei, type Address } from 'viem'
 import { useEstimateGas, useSendTransaction, useSignMessage, useBalance } from 'wagmi'
@@ -22,6 +22,8 @@ export const ActionButtonList = ({ sendHash, sendSignMsg, sendBalance }: ActionB
     const { switchNetwork } = useAppKitNetwork(); // AppKithook to switch network
     const { address, isConnected } = useAppKitAccount() // AppKit hook to get the address and check if the user is connected
 
+    const [isMobile, setIsMobile] = useState(false);
+
     const { data: gas } = useEstimateGas({...TEST_TX}); // Wagmi hook to estimate gas
     const { data: hash, sendTransaction, } = useSendTransaction(); // Wagmi hook to send a transaction
     const { signMessageAsync } = useSignMessage() // Wagmi hook to sign a message
@@ -29,12 +31,26 @@ export const ActionButtonList = ({ sendHash, sendSignMsg, sendBalance }: ActionB
       address: address as Address
     }); // Wagmi hook to get the balance
 
+    useEffect(() => {
+      const userAgent = navigator.userAgent;
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent.toLowerCase());
+      setIsMobile(isMobileDevice);
+    }, []);
     
     useEffect(() => {
         if (hash) {
           sendHash(hash);
         }
     }, [hash]);
+
+    // function to connect a wallet
+    const handleConnect = () => {
+      if (isMobile) {
+        open({ view: 'Connect' }); // deep link: without qrcode
+      } else {
+        open(); // default:, with qrcode
+      }
+    };
 
     // function to send a tx
     const handleSendTx = () => {
@@ -71,9 +87,26 @@ export const ActionButtonList = ({ sendHash, sendSignMsg, sendBalance }: ActionB
 
   return (
     <div>
-    {isConnected && ( 
+      {!isConnected ? (
+        <button
+          onClick={handleConnect}
+          style={{
+            padding: '12px 24px',
+            fontSize: '16px',
+            backgroundColor: '#000',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            marginBottom: '16px'
+          }}
+        >
+          {'🔗 连接钱包'}
+        </button>
+      ) : (
     <>
         <button onClick={() => open()}>Open</button>
+        <button onClick={handleDisconnect}>Disconnect</button>
         <button onClick={handleDisconnect}>Disconnect</button>
         <button onClick={() => switchNetwork(networks[1]) }>Switch</button>
         <button onClick={handleSignMsg}>Sign msg</button>
