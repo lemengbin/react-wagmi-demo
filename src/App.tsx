@@ -23,13 +23,15 @@ const generalConfig = {
   }
 }
 
+const SAFE_WALLET_ID = '32e6edcfbd770996fed2f4088b76a5c0151903d4ab9771feb92e5cf75080b131'
 // Create modal
 createAppKit({
   adapters: [wagmiAdapter],
   ...generalConfig,
   features: {
     analytics: true // Optional - defaults to your Cloud configuration
-  }
+  },
+  featuredWalletIds: [SAFE_WALLET_ID],
 })
 
 export function App() {
