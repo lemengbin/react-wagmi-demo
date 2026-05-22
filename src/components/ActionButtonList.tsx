@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useDisconnect, useAppKit, useAppKitNetwork, useAppKitAccount  } from '@reown/appkit/react'
+import { useDisconnect, useAppKit, useAppKitAccount } from '@reown/appkit/react'
 import { parseGwei, type Address } from 'viem'
-import { useEstimateGas, useSendTransaction, useSignMessage, useBalance } from 'wagmi'
+import { useChainId, useSwitchChain, useEstimateGas, useSendTransaction, useSignMessage, useBalance } from 'wagmi'
 import { networks } from '../config'
 
 // test transaction
@@ -19,11 +19,12 @@ interface ActionButtonListProps {
 export const ActionButtonList = ({ sendHash, sendSignMsg, sendBalance }: ActionButtonListProps) => {
     const { disconnect } = useDisconnect(); // AppKit hook to disconnect
     const { open } = useAppKit(); // AppKit hook to open the modal
-    const { switchNetwork } = useAppKitNetwork(); // AppKithook to switch network
     const { address, isConnected } = useAppKitAccount() // AppKit hook to get the address and check if the user is connected
 
     const [isMobile, setIsMobile] = useState(false);
 
+    const currentChainId = useChainId(); // Wagmi hook to get chain id
+    const { switchChainAsync } = useSwitchChain(); // Wagmi hook to swith network
     const { data: gas } = useEstimateGas({...TEST_TX}); // Wagmi hook to estimate gas
     const { data: hash, sendTransaction, } = useSendTransaction(); // Wagmi hook to send a transaction
     const { signMessageAsync } = useSignMessage() // Wagmi hook to sign a message
@@ -85,6 +86,27 @@ export const ActionButtonList = ({ sendHash, sendSignMsg, sendBalance }: ActionB
       }
     };
 
+    const handleSwitchNetwork = async (targetNetwork: (typeof networks)[0]) => {
+      console.log("Current network: " + currentChainId + ", target network: " + targetNetwork.id);
+
+      if (currentChainId === targetNetwork.id) {
+        console.log("Already on the correct network");
+        return;
+      }
+
+      try {
+        await switchChainAsync({ chainId: Number(targetNetwork.id) });
+      } catch (error: any) {
+        if (error?.code === 4902) {
+          console.log("Unknown network, please manually add it");
+          alert(`Please add network manually.\n\nNetwork name：${targetNetwork.name}\nRPC URL：${targetNetwork.rpcUrls.default.http[0]}\nChain ID：${targetNetwork.id}\nSymbol：${targetNetwork.nativeCurrency.symbol}`);
+        } else {
+          console.error("Failed to swith network: ", error);
+          alert("Failed to swith network: " + error);
+        }
+      }
+    };
+
   return (
     <div>
       {!isConnected ? (
@@ -107,8 +129,8 @@ export const ActionButtonList = ({ sendHash, sendSignMsg, sendBalance }: ActionB
     <>
         <button onClick={() => open()}>Open</button>
         <button onClick={handleDisconnect}>Disconnect</button>
-        <button onClick={handleDisconnect}>Disconnect</button>
-        <button onClick={() => switchNetwork(networks[1]) }>Switch</button>
+        <button onClick={() => handleSwitchNetwork(networks[0])}>Switch Mainnet</button>
+        <button onClick={() => handleSwitchNetwork(networks[1])}>Switch Testnet</button>
         <button onClick={handleSignMsg}>Sign msg</button>
         <button onClick={handleSendTx}>Send tx</button>
         <button onClick={handleGetBalance}>Get Balance</button>  
