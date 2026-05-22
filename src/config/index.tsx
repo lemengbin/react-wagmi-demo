@@ -13,7 +13,7 @@ export const metadata = {
     name: 'Lmb-Dapp',
     description: 'This is a dapp for SAFE chain',
     url: 'https://lmb-dapp.anwang.com', // origin must match your domain & subdomain
-    icons: ['https://avatars.githubusercontent.com/u/179229932']
+    icons: ['https://lmb-dapp.anwang.com/lmb-dapp.png']
   }
 
 const safe = defineChain({
